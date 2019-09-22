@@ -23,6 +23,7 @@ Accuracy for Training split:<br>
 <p align="left">
 <img src="/images/train.png"></img>
 </p>
+
 Accuracy for validation split:<br>
 <p align="left">
 <img src="/images/test.png"></img>
