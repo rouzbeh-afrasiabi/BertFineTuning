@@ -1,0 +1,8 @@
+pycm==2.2
+pandas==0.25.1
+torch==1.2.0
+spacy==2.1.4
+requests==2.22.0
+pytorch_transformers==1.0.0
+numpy==1.17.2
+scikit_learn==0.21.3
