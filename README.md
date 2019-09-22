@@ -2,9 +2,13 @@
 ## (project in progress)
 BERT Fine-tuning for Quora Question Pairs
 
-Fine-tune BERT for duplicate detection with 6 lines of code
+Fine-tune BERT for duplicate detection with 9 lines of code
 
 
+    from BertFineTuning.data_utils import *
+    from BertFineTuning.model import *
+    from pytorch_transformers.optimization import AdamW
+    
     BFT=BertFineTuning()
 
     BFT.criterion=nn.CrossEntropyLoss()
