@@ -21,7 +21,7 @@ Results for Training split:<br>
 <p align="center">
 <img src="/images/train.png"></img>
 </p>
-<p align="center">
 Results for validation split:<br>
+<p align="center">
 <img src="/images/test.png"></img>
 </p>
