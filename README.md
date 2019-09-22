@@ -20,10 +20,10 @@ Fine-tune BERT for duplicate detection with 9 lines of code
     
  
 Accuracy for Training split:<br>
-<p align="center">
+<p align="left">
 <img src="/images/train.png"></img>
 </p>
 Accuracy for validation split:<br>
-<p align="center">
+<p align="left">
 <img src="/images/test.png"></img>
 </p>
