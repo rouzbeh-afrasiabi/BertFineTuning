@@ -1,6 +1,6 @@
 # BertFineTuning
 ## (project in progress)
-Bert Fine Tuning for Quora Question Pairs
+BERT Fine-tuning for Quora Question Pairs
 
 Fine-tune BERT for duplicate detection with 6 lines of code
 
