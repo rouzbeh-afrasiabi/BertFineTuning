@@ -19,11 +19,11 @@ Fine-tune BERT for duplicate detection with 9 lines of code
     BFT.train(model_config,ml.bert_train_split,ml.bert_valid_split,epochs=100,print_every=100,validate_at_epoch=0)
     
  
-Results for Training split:<br>
+Accuracy for Training split:<br>
 <p align="center">
 <img src="/images/train.png"></img>
 </p>
-Results for validation split:<br>
+Accuracy for validation split:<br>
 <p align="center">
 <img src="/images/test.png"></img>
 </p>
