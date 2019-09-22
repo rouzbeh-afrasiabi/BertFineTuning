@@ -1,4 +1,6 @@
 from utils import *
+from data_config import *
+
 import os
 import sys
 import math
@@ -25,9 +27,6 @@ sys.path.append(cwd)
 sys.path.insert(0, cwd)
 
 random_state=123
-_max_string_length=150 #per string, there are two question strings with each _max_string_length number of characters
-_max_token_length=100 # maximum number of tokens in the combined bert format
-
 
 
 def create_folders(folders):
