@@ -1,5 +1,5 @@
-from utils import *
-from data_config import *
+from BertFineTuning.utils import *
+from BertFineTuning.data_config import *
 
 import os
 import sys
