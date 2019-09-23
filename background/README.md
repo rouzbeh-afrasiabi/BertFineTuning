@@ -34,7 +34,7 @@ In case of both duplicate and unique question pairs the histograms show a positi
 <p align="center">
 <img src="../images/box_duplication.png"></img>
 </p>
-
+Sequqnces in question two are observed to show a higher number of outliers. 
 <p align="center">
 <img src="../images/hist_duplication_300.png"></img>
 </p>
