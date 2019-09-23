@@ -11,8 +11,7 @@ The Quora Question Pairs (QQP) dataset has been the subject of a <a href="https:
 As <a href="https://www.quora.com/q/quoradata/First-Quora-Dataset-Release-Question-Pairs">described</a> by Quora, the inefficiencies of categorizing questions in Quora's question databse can hinder efforts to allocate a single page to questions that are logically related. As a result, a better model compared to Random Forest model ,which was being used by Quora for this task, is required to detect semantically equivalent sequences.
 
 <p align="center">
-<img src="../images/dataset_.png"></img>
-source:https://github.com/howardyclo/Kaggle-Quora-Question-Pairs
+<img src="../images/dataset.png"></img>
 </p>
 
 ## Metrics
