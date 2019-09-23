@@ -29,3 +29,6 @@ Considering the fact that the QQP dataset is imbalance the metrics selected for 
 <img src="../images/hist_duplication.png"></img>
 </p>
 
+<p align="center">
+<img src="../images/hist_duplication_300.png"></img>
+</p>
