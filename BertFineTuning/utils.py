@@ -3,7 +3,10 @@ import sys
 
 cwd = os.getcwd()
 
-    
+def chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+        
 def check_file(filename,location=cwd):    
     
     return os.path.exists(os.path.join(location,filename)),os.path.join(location,filename)
