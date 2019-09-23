@@ -46,3 +46,5 @@ Histograms of duplicated and unique records show a positive skew. While the dist
 <p align="center">
 <img src="../images/hist_common_count_lbl.png"></img>
 </p>
+
+## Methodology
