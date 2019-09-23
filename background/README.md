@@ -42,7 +42,7 @@ As demonstrated in the following figure, the majority of sequences have five wor
 <p align="center">
 <img src="../images/hist_common_count.png"></img>
 </p>
-Histograms of duplicated and unique records show a positive skew. While the distributions are similar the duplicated records show a higher number of instances with fewer words in common.
+Histograms of duplicated and unique records show a positive skew. While the distributions are similar the duplicated records show a higher number of instances that have zero to five words in common.
 <p align="center">
 <img src="../images/hist_common_count_lbl.png"></img>
 </p>
