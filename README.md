@@ -2,10 +2,10 @@
 ## (project in progress)
 BERT Fine-tuning for Quora Question Pairs
 
-Fine-tune BERT for duplicate detection with 9 lines of code
+Fine-tune BERT for duplicate detection with 9 lines of code. The code can be modified for fine-tuning BERT on custom datasets.
 
 
-    from BertFineTuning.data_utils import *
+    from BertFineTuning.data_utils import
     from BertFineTuning.model import *
     from pytorch_transformers.optimization import AdamW
     
