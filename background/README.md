@@ -22,6 +22,6 @@ Considering the fact that the QQP dataset is imbalance the metrics selected for 
 
 ## Data Exploration
 
-
+<img src="../images/bar_duplication.png"></img>
 
 
