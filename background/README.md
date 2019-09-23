@@ -12,7 +12,6 @@ As <a href="https://www.quora.com/q/quoradata/First-Quora-Dataset-Release-Questi
 
 <p align="center">
 <img src="../images/dataset_.png"></img>
-source:https://github.com/howardyclo/Kaggle-Quora-Question-Pairs
 </p>
 
 ## Metrics
