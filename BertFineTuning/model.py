@@ -154,7 +154,7 @@ class BertFineTuning():
         except:
             print("Failed to Save Model!!")
             
-    def load_checkpoint(self,path):
+    def load_checkpoint(self,path=self.save_folder):
         if(check_file(path)):
             self.checkpoint = torch.load(path,map_location=self.device)
             self.model.load_state_dict(self.checkpoint["state_dict"])
