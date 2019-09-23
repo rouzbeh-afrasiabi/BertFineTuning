@@ -30,7 +30,7 @@ In case of both duplicate and unique question pairs the histograms show a positi
 <p align="center">
 <img src="../images/hist_duplication.png"></img>
 </p>
- For both categories outliers are detected above 200 sequence length.
+ For both categories outliers are detected having sequence lengths above 200 characters.
 <p align="center">
 <img src="../images/box_duplication.png"></img>
 </p>
