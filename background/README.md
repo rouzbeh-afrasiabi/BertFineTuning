@@ -26,11 +26,11 @@ The dataset is imbalanced and the number of question pairs that are duplicates a
 <p align="center">
 <img src="../images/bar_duplication.png"></img>
 </p>
-
+In case of both duplicate and unique question pairs the histograms show a positive skew (skewed right).
 <p align="center">
 <img src="../images/hist_duplication.png"></img>
 </p>
-
+ For both categories outliers are detected above 200 sequence length.
 <p align="center">
 <img src="../images/box_duplication.png"></img>
 </p>
