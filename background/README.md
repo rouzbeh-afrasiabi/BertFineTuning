@@ -26,7 +26,7 @@ The dataset is imbalanced and the number of question pairs that are duplicates a
 <p align="center">
 <img src="../images/bar_duplication.png"></img>
 </p>
-
+In case of both duplicate and unique question pairs the histograms show a positive skew (skewed right).
 <p align="center">
 <img src="../images/hist_duplication.png"></img>
 </p>
