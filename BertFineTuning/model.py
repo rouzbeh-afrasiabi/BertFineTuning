@@ -101,6 +101,7 @@ class BertFineTuning():
         self.print_every=100
         self.e=0
         self.target_folder=cwd
+	self.save_folder=os.path.join(cwd,'checkpoints')
         
     @staticmethod
     def _update_dict_strict(target,**kwargs):
@@ -251,6 +252,6 @@ class BertFineTuning():
                 self.print_results(_cm)
                 print("************************","\n")
                 self.cm_test.append(_cm)
-            self.save_it(self.target_folder)
+            self.save_it(self.save_folder)
             self.scheduler.step()        
             
