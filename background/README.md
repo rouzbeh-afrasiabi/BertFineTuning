@@ -1,4 +1,5 @@
 # BertFineTuning
+
 ## Project Overview
 This project aims to fine-tune a pre-trained <a href="https://arxiv.org/pdf/1810.04805.pdf">BERT</a> (Bidirectional Encoder Representations from Transformers) model on a duplicate/similarity detection task using Quora Question Pairs dataset for training. 
 
@@ -14,6 +15,8 @@ Considering the fact that the QQP dataset is imbalance the metrics selected for 
 
 
 # Analysis
+
+## Data Exploration
 
 
 
