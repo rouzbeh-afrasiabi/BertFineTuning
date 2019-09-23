@@ -22,7 +22,7 @@ Considering the fact that the QQP dataset is imbalance the metrics selected for 
 
 ## Data Exploration
 
-As expected the dataset is imbalanced and the number of question pairs that are duplicates are much lower than the ones that are unique. The below figure demonstrates the imbalance observed in the dataset.
+The dataset is imbalanced and the number of question pairs that are duplicates are much lower than the ones that are unique. The below figure demonstrates the imbalance observed in the dataset.
 <p align="center">
 <img src="../images/bar_duplication.png"></img>
 </p>
