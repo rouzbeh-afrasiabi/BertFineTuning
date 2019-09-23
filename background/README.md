@@ -8,7 +8,7 @@ The Quora Question Pairs (QQP) dataset has been the subject of a <a href="https:
 
 ## Problem Statement
 
-
+As described by Quora, the inefficiencies of categorizing questions in Quora's questions databse can hinder efforts to allocate a single page to questions that are logically related.  
 
 
 
