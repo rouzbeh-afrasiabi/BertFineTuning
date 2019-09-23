@@ -38,3 +38,7 @@ The dataset is imbalanced and the number of question pairs that are duplicates a
 <p align="center">
 <img src="../images/hist_duplication_300.png"></img>
 </p>
+
+<p align="center">
+<img src="../images/hist_common.png"></img>
+</p>
