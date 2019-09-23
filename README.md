@@ -17,7 +17,13 @@ Fine-tune BERT for duplicate detection with 9 lines of code
     
     ml=MultiLoader()
     BFT.train(model_config,ml.bert_train_split,ml.bert_valid_split,epochs=100,print_every=100,validate_at_epoch=0)
-    
+ 
+ 
+Loss for Training and Test splits:<br>
+ Accuracy and F1 for Training split:<br>
+<p align="left">
+<img src="/images/loss.png"></img>
+</p>
  
 Accuracy and F1 for Training split:<br>
 <p align="left">
