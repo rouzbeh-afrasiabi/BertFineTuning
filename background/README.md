@@ -8,9 +8,7 @@ The Quora Question Pairs (QQP) dataset has been the subject of a <a href="https:
 
 ## Problem Statement
 
-As <a href="https://www.quora.com/q/quoradata/First-Quora-Dataset-Release-Question-Pairs">described</a> by Quora, the inefficiencies of categorizing questions in Quora's question databse can hinder efforts to allocate a single page to questions that are logically related. As a result a better model is required to detect semantically equivalent sequences and  automate the proccess of duplicate detection. 
-
-
+As <a href="https://www.quora.com/q/quoradata/First-Quora-Dataset-Release-Question-Pairs">described</a> by Quora, the inefficiencies of categorizing questions in Quora's question databse can hinder efforts to allocate a single page to questions that are logically related. As a result, a better model compared to Random Forest model ,which was being used by Quora for this task, is required to detect semantically equivalent sequences.
 
     
     
