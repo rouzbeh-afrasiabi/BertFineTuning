@@ -1,6 +1,6 @@
 # BertFineTuning
 ## Project Overview
-This project aims to utilize the BERT (Bidirectional Encoder Representations from Transformers)
+This project aims to fine-tune BERT (Bidirectional Encoder Representations from Transformers) which was proposed in October 2018 by Google for duplpicate detection using Quora Question Pairs dataset. 
   
 
 
