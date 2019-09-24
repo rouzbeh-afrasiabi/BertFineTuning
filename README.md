@@ -24,15 +24,12 @@ Loss for Training and Test splits:<br>
 <img src="/images/loss.png"></img>
 </p>
  
-Accuracy and F1 for Training split:<br>
+Accuracy and F1 for training and validation split:<br>
 <p align="left">
-<img src="/images/train.png"></img>
+<img src="/images/results.png"></img>
 </p>
 
-Accuracy and F1 for validation split:<br>
-<p align="left">
-<img src="/images/test.png"></img>
-</p>
+
 
 ## Requirements
         pycm==2.2
