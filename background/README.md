@@ -83,7 +83,7 @@ Accuracy and F1 for training and validation splits:<br>
 As can be seen from the above results at epoch two the model shows the best results, upon training the model further an increase in test loss is observed. Based on these results an early stopping strategy should be used to stop the model from overfitting the training data.
 
 # Relection
-This project demonstrates the use of fine-tuning to reach SOTA results using BERT model. The application of transfer learning in NLP is very exciting. 
+This project demonstrates the use of fine-tuning to reach close to SOTA results using BERT model. The application of transfer learning in NLP is very exciting. 
 
 # Improvment
 The results can be further improved by optimizing hyper parameters especially batch size, learning rate and weight decay. 
