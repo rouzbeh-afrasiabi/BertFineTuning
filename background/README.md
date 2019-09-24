@@ -62,3 +62,6 @@ Histograms of duplicated and unique records show a positive skew. While the dist
 The cleaned data was then split into three portions with fractions: 0.6,0.2 and 0.2 fractions using calculated class weights.
 <img src="../images/split_counts.png"></img>
 
+## Data formatting for BERT
+At the final stage of processing the the data is properly formatted for BERT. (please see following table for examples)
+<img src="../images/BERT_format.png"></img>
