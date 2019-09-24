@@ -70,7 +70,7 @@ At the final stage of processing, the the data is properly formatted for BERT. (
 </p>
 
 # Implementation
-The <a href="https://github.com/huggingface/pytorch-transformers">Hugging Face</a> implementation of BERT model has been utilized as the base for creating the model, to this a simple classifier is added (feed forward with batchnorm and no dropout) as the ouput layer. For the purpose of training the model, two seperate learning rates have been chosen for the pre-trained model and the classifier. A smaller learning rate is chosen for BERT to avoid Catastrophic forgetting. This method allows minor changes in the pre-trained weights while the change in the classifier are more prominent.  It is also possible to first train the classifier and freeze the pretrained BERT, here this method has not been utilized for the sake of simplicity. 
+The <a href="https://github.com/huggingface/pytorch-transformers">Hugging Face</a> implementation of BERT model has been utilized as the base for creating the model, to this a simple classifier is added (feed forward with batchnorm and no dropout) as the ouput layer. For the purpose of training the model, two seperate learning rates have been chosen for the pre-trained model and the classifier. A smaller learning rate is chosen for BERT to avoid <a href="https://arxiv.org/pdf/1905.05583.pdf"> catastrophic forgetting</a>. This method allows minor changes in the pre-trained weights while the change in the classifier are more prominent.  It is also possible to first train the classifier and freeze the pretrained BERT, here this method has not been utilized for the sake of simplicity. 
 
 # Model Evaluation and Validation
 
