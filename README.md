@@ -20,7 +20,6 @@ Fine-tune BERT for duplicate detection with 9 lines of code. The code can be mod
  
  
 Loss for Training and Test splits:<br>
- Accuracy and F1 for Training split:<br>
 <p align="left">
 <img src="/images/loss.png"></img>
 </p>
