@@ -15,7 +15,7 @@ As <a href="https://www.quora.com/q/quoradata/First-Quora-Dataset-Release-Questi
 </p>
 
 ## Metrics
-Considering the fact that the QQP dataset is imbalance the metrics selected for fine-tuning the model are MCC, ACC, F1 and Recall. Furthermore, confusion matrix has been utilized to better understand the results. While the above mentioned metrics have been utilized for this tasks, other metrics have also been collected using the <a href="https://github.com/sepandhaghighi/pycm">pycm</a> package and are available as one of the variables collected when the fine-tuning is performed.
+Considering the fact that the QQP dataset is imbalance the metrics selected for fine-tuning the model are MCC, ACC, F1 and Recall. Furthermore, confusion matrix has been utilized to better understand the results. While the above mentioned metrics have been utilized for this tasks, other metrics have also been collected using the <a href="https://github.com/sepandhaghighi/pycm">pycm</a> package and are available as one of the variables saved during checkpoint creation.
 
 
 # Analysis
