@@ -64,7 +64,7 @@ The cleaned data was then split into three portions with fractions: 0.6,0.2 and 
 <img src="../images/split_counts.png"></img>
 
 ## Data formatting for BERT
-At the final stage of processing the the data is properly formatted for BERT. (please see following table for examples)
+At the final stage of processing, the the data is properly formatted for BERT. (please see following table for examples)
 <p>
 <img src="../images/BERT_format.png"></img>
 </p>
