@@ -70,6 +70,6 @@ At the final stage of processing the the data is properly formatted for BERT. (p
 </p>
 
 # Implementation
-The Hugging Face implementation of BERT model has been utilized as the base for creating the model, to this a simple classifier is added as the ouput layer. For the purpose of training the model, two seperate learning rates have been chosen for the pre-trained model and the classifier. This method allows minor changes in the pre-trrained weights while the change in the classifier are more prominent. It is also possible to first train the classifier and freeze the pretrained BERT, here this method has not been utilized for the sake of simplicity. 
+The <a href="https://github.com/huggingface/pytorch-transformers">Hugging Face</a> implementation of BERT model has been utilized as the base for creating the model, to this a simple classifier is added as the ouput layer. For the purpose of training the model, two seperate learning rates have been chosen for the pre-trained model and the classifier. This method allows minor changes in the pre-trrained weights while the change in the classifier are more prominent. It is also possible to first train the classifier and freeze the pretrained BERT, here this method has not been utilized for the sake of simplicity. 
 
 
