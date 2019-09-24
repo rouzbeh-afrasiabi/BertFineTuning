@@ -24,7 +24,7 @@ Loss for Training and Test splits:<br>
 <img src="/images/loss.png"></img>
 </p>
  
-Accuracy and F1 for training and validation split:<br>
+Accuracy and F1 for training and validation splits:<br>
 <p align="left">
 <img src="/images/results.png"></img>
 </p>
@@ -40,3 +40,6 @@ Accuracy and F1 for training and validation split:<br>
         pytorch_transformers==1.0.0
         numpy==1.17.2
         scikit_learn==0.21.3
+## Setup
+
+        pip install -r requirements.txt

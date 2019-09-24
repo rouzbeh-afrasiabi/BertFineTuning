@@ -50,3 +50,15 @@ Histograms of duplicated and unique records show a positive skew. While the dist
 # Methodology
 
 ## Data Preprocessing
+
+- Conversion to lower case.
+- word2vec was used to detect out of vocabulary words. 
+- For all out of vocabulary words punctuation was removed.
+- All tokens were then lemmatized.
+- Next all stop words were removed.
+- Finally all remaining punctuations were removed
+
+## Train, Validation and Test splits
+The cleaned data was then split into three portions with fractions: 0.6,0.2 and 0.2 fractions using calculated class weights.
+<img src="../images/splits_count.png"></img>
+
