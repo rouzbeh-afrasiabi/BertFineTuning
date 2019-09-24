@@ -24,7 +24,7 @@ Loss for Training and Test splits:<br>
 <img src="/images/loss.png"></img>
 </p>
  
-Accuracy and F1 for training and validation split:<br>
+Accuracy and F1 for training and validation splits:<br>
 <p align="left">
 <img src="/images/results.png"></img>
 </p>
