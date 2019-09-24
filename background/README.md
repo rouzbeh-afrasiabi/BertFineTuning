@@ -68,3 +68,6 @@ At the final stage of processing the the data is properly formatted for BERT. (p
 <p>
 <img src="../images/BERT_format.png"></img>
 </p>
+
+# Implementation
+
