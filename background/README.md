@@ -60,5 +60,5 @@ Histograms of duplicated and unique records show a positive skew. While the dist
 
 ## Train, Validation and Test splits
 The cleaned data was then split into three portions with fractions: 0.6,0.2 and 0.2 fractions using calculated class weights.
-<img src="../images/splits_count.png"></img>
+<img src="../images/split_counts.png"></img>
 
