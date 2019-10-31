@@ -17,7 +17,6 @@ from torch.utils.data import DataLoader
 from torch import optim
 import torch.nn.functional as F
 
-import matplotlib.pyplot as plt
 import copy
 import gc
 
