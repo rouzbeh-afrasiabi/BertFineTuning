@@ -244,8 +244,8 @@ bert_split_data = []
 names = ['bert_train_split', 'bert_valid_split', 'bert_test_split']
 if not all([os.path.exists(os.path.join(processed_data_folder, name+'.csv')) for name in names]):
     for (k, target) in copy.deepcopy(split_data_dict).items():
-        target['question1'] = target['question1'].apply(lambda x:x[0:_max_string_length])
-        target['question2'] = target['question2'].apply(lambda x:x[0:_max_string_length])
+        target['question1'] = target['question1'].apply(lambda x:x[0:max_string_length])
+        target['question2'] = target['question2'].apply(lambda x:x[0:max_string_length])
         marked_text = pd.DataFrame('[CLS] ' + target['question1']+ ' [SEP] ' + target['question2']+ ' [SEP] ', columns=['text'])
         marked_text['label'] = target['is_duplicate']
         bert_split_data.append(marked_text)
