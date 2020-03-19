@@ -4,6 +4,7 @@ import multiprocessing as mp
 
 cwd = os.getcwd()
 processed_data_folder=os.path.join(cwd,'data','processed')
+target_folder=os.path.join(cwd,'data','processed')
 mp.set_start_method('spawn')
 
 max_string_length=150 
@@ -31,12 +32,13 @@ DataLoader_config={
 'test':1
 }
 
+
 class DataLocation():
     def __init__(self,):
         
-        def get_loc(processed_data_folder=processed_data_folder):
-            files=os.listdir(processed_data_folder)
-            result={os.path.splitext(file_name)[0]:os.path.join(processed_data_folder,file_name) for file_name in files}
+        def get_loc(target_folder=processed_data_folder):
+            files=os.listdir(target_folder)
+            result={os.path.splitext(file_name)[0]:os.path.join(target_folder,file_name) for file_name in files}
             return result
         kwargs=get_loc()
         self.__kwargs=kwargs
@@ -55,6 +57,6 @@ class LoaderConfig():
             
 
 def data_load_config():
-    return {'_DataLocation':DataLocation(),'_DataLoader_config':LoaderConfig()}
+    return {'_DataLocation':DataLocation(),'_DataLoader_config':LoaderConfig(),'_max_token_length':max_token_length}
 
         

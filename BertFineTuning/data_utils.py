@@ -17,16 +17,22 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class CustomSet(Dataset):
-    def __init__(self,_target):
+    def __init__(self,_target,_max_token_length):
         self.samples = pd.read_csv(_target, index_col=[0])
-        self.max_length=max_token_length
+        self.max_length=_max_token_length
 
     def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx):
         text=str(self.samples['text'].iloc[idx])
-        label=self.samples['label'].iloc[idx]
+        label_names=[col  for col in self.samples.columns if 'label' in col]
+        id_names=[col  for col in self.samples.columns if 'id' in col]
+        if(id_names):
+            ids=self.samples[id_names[0]].iloc[idx]
+        else:
+            ids=[]
+        labels=tuple(self.samples[label].iloc[idx] for label in label_names)
         tokenized_text = np.array(tokenizer.tokenize(text))
         list_of_indices=torch.tensor(tokenizer.convert_tokens_to_ids(tokenized_text)).to(device)
         segments_ids=torch.tensor([int(102 in list_of_indices[:i]) for i,index in enumerate(list_of_indices)]).to(device)
@@ -36,7 +42,7 @@ class CustomSet(Dataset):
         if(pad_len>0):
             new_list_of_indices=F.pad(new_list_of_indices, pad=(0,pad_len), mode='constant', value=0).to(device)
             new_segments_ids=F.pad(new_segments_ids, pad=(0,pad_len), mode='constant', value=0).to(device)
-        return new_list_of_indices,new_segments_ids,label
+        return (ids,new_list_of_indices,new_segments_ids)+labels
 
     
     
@@ -54,8 +60,11 @@ class MultiLoader():
             output_sets={}
             output_loaders={}
             for key,location in self._DataLocation.items:
-                output_sets[key]=CustomSet(location)
-                output_loaders[key]=DataLoader(output_sets[key], **getattr(self._DataLoader_config,key))
+                output_sets[key]=CustomSet(location,self._max_token_length)
+                if hasattr(self._DataLoader_config, key):
+                    output_loaders[key]=DataLoader(output_sets[key], **getattr(self._DataLoader_config,key))
+                else:
+                    warnings.warn(key+" is not a valid key.")
             return(output_loaders)
         self.__dict__.update(DataLoaders())
             

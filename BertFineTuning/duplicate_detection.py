@@ -20,7 +20,7 @@ import torch.nn.functional as F
 import copy
 import gc
 
-from pytorch_transformers import BertModel
+from transformers import BertModel
 
 cwd = os.getcwd()
 sys.path.append(cwd)
@@ -45,11 +45,12 @@ class BertFineTuning():
             def __init__(self, pre_trained_model,config):
                 super().__init__()
                 self.pre_trained_model=pre_trained_model.to(config['device'])
+                self.pre_trained_out_features=list(list(self.pre_trained_model.children())[-1].children())[0].out_features
                 self.classifier=nn.Sequential(OrderedDict([
-                    ('fc1', nn.Linear(config['in_features'], config['in_features'])),
-                    ('bn_1',nn.BatchNorm1d(config['in_features'])),
+                    ('fc1', nn.Linear(self.pre_trained_out_features, self.pre_trained_out_features)),
+                    ('bn_1',nn.BatchNorm1d(self.pre_trained_out_features)),
                     ('prelu1', nn.PReLU()),
-                    ('fc2', nn.Linear(config['in_features'], config['num_classes']))]))
+                    ('fc2', nn.Linear(self.pre_trained_out_features, config['num_classes']))]))
 
             def forward(self, tokens_tensor, segments_tensors):
                 last_hidden_state, pooled_output  = self.pre_trained_model(tokens_tensor, segments_tensors)
@@ -177,7 +178,7 @@ class BertFineTuning():
             predictions=np.array([])
             loss_history=[0]
             labels=np.array([])
-            for i, (_list_of_indices,_segments_ids,_labels) in enumerate(target_loader):
+            for i, (_ids,_list_of_indices,_segments_ids,_labels) in enumerate(target_loader):
                 _labels=_labels.to(self.device).long()
                 _list_of_indices,_segments_ids = _list_of_indices.to(self.device), _segments_ids.to(self.device)
                 _output = self.model(_list_of_indices,_segments_ids)
@@ -214,8 +215,8 @@ class BertFineTuning():
         self.train_loops=len(train_loader)//print_every
         for e in range(self.last_epoch,self.epochs,1):
             self.e=e
-
-            for i,(list_of_indices,segments_ids,labels) in enumerate(train_loader):
+            
+            for i,(ids,list_of_indices,segments_ids,labels) in enumerate(train_loader):
                 model.train()
                 list_of_indices,segments_ids,labels=list_of_indices.to(self.device),segments_ids.to(self.device),labels.to(self.device)
                 output=model(list_of_indices,segments_ids)
