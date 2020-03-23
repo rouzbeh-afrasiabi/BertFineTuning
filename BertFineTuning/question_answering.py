@@ -1,5 +1,5 @@
 from BertFineTuning.utils import *
-from BertFineTuning.model_config import*
+from BertFineTuning.question_answering_model_config import *
 
 import os
 import sys
@@ -16,11 +16,12 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from torch import optim
 import torch.nn.functional as F
+from torch.autograd import Variable
 
 import copy
 import gc
 
-from transformers import BertModel
+from transformers import BertModel,BertForQuestionAnswering
 
 cwd = os.getcwd()
 sys.path.append(cwd)
@@ -41,21 +42,46 @@ np.random.seed(random_state)
 class BertFineTuning():
     def __init__(self,):
         
+        class View(nn.Module):
+            def __init__(self, *shape):
+                super(View, self).__init__()
+                self.shape = shape
+            def forward(self, input):
+                return input.view(*self.shape)  
+            
+        class Split(nn.Module):
+            def __init__(self, *split):
+                super(Split, self).__init__()
+                self.split = split
+            def forward(self, input):
+                return input.split(*self.split,dim=1)         
+            
         class Network(nn.Module):
             def __init__(self, pre_trained_model,config):
                 super().__init__()
+               
+                
                 self.pre_trained_model=pre_trained_model.to(config['device'])
-                self.out_features=list(self.pre_trained_model.children())[-1].out_features
+                self.pre_trained_out_features=list(list(self.pre_trained_model.children())[-1].children())[0].out_features
+                self.model_output_features=config['max_token_length']
                 self.classifier=nn.Sequential(OrderedDict([
-                    ('fc1', nn.Linear(self.out_features, self.out_features)),
-                    ('bn_1',nn.BatchNorm1d(self.out_features)),
+                    ('fltn1',nn.Flatten()),
+                    ('fc1', nn.Linear(self.pre_trained_out_features*self.model_output_features, self.model_output_features)),
+                    ('bn_1',nn.BatchNorm1d(self.model_output_features)),
                     ('prelu1', nn.PReLU()),
-                    ('fc2', nn.Linear(self.in_features, self._outfeatures))]))
-
+                    ('fc2', nn.Linear(self.model_output_features, self.model_output_features*config['num_classes'])),
+                    ('rs1',View(-1, 2, self.model_output_features)),
+                    ('splt1',Split(1)),
+                ]))
+                
+                self.flatten=nn.Flatten()
+                
             def forward(self, tokens_tensor, segments_tensors):
-                last_hidden_state, pooled_output  = self.pre_trained_model(tokens_tensor, segments_tensors)
-                logits = self.classifier(last_hidden_state)
-                return logits 
+                last_hidden_state, pooled_output = self.pre_trained_model(tokens_tensor, segments_tensors)
+                start_logits, end_logits = self.classifier(last_hidden_state)
+
+                return self.flatten(start_logits), self.flatten(end_logits) 
+        
             
         def __device():
             return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -127,6 +153,22 @@ class BertFineTuning():
         print("Precision: ",cm.PPV)
         print("recall: ",cm.TPR)
         cm.print_matrix() 
+        
+    @staticmethod    
+    def logits_to_one_hot(logits):
+        loc=torch.argmax(logits,dim=1).data.cpu().numpy()
+        prediction=np.zeros_like(logits.detach().data.cpu().numpy())
+        prediction[np.arange(prediction.shape[0]),loc]=1
+        prediction=prediction.flatten() 
+        return(prediction)
+    
+    @staticmethod
+    def index_to_labels_like(loc,logits):
+        loc=loc.data.cpu().numpy()
+        labels=np.zeros_like(logits.detach().data.cpu().numpy())
+        labels[np.arange(labels.shape[0]),loc]=1
+        labels=labels.flatten() 
+        return(labels)
 
     def save_it(self,target_folder):
         self.model.eval()
@@ -178,7 +220,7 @@ class BertFineTuning():
             predictions=np.array([])
             loss_history=[0]
             labels=np.array([])
-            for i, (_ids,_list_of_indices,_segments_ids,_labels) in enumerate(target_loader):
+            for i, (_ids,_list_of_indices,_segments_ids,_start_label,_end_label) in enumerate(target_loader):
                 _labels=_labels.to(self.device).long()
                 _list_of_indices,_segments_ids = _list_of_indices.to(self.device), _segments_ids.to(self.device)
                 _output = self.model(_list_of_indices,_segments_ids)
@@ -196,7 +238,11 @@ class BertFineTuning():
 
     def train(self,model_config,train_loader,valid_loader,epochs=100,print_every=100,validate_at_epoch=0):
         model=self.model
+        train_res_start=np.array([])
+        train_res_end=np.array([])
         train_res=np.array([])
+        train_lbl_start=np.array([])
+        train_lbl_end=np.array([])
         train_lbl=np.array([])
         if(not self.check_point_loaded):
             self.loss_history=[]
@@ -215,20 +261,35 @@ class BertFineTuning():
         self.train_loops=len(train_loader)//print_every
         for e in range(self.last_epoch,self.epochs,1):
             self.e=e
-            
-            for i,(ids,list_of_indices,segments_ids,labels) in enumerate(train_loader):
+            for i,_loader_dict in enumerate(train_loader):
+                ids,list_of_indices,segments_ids,labels=_loader_dict.values()
+                start_labels,end_labels=labels
+                
                 model.train()
-                list_of_indices,segments_ids,labels=list_of_indices.to(self.device),segments_ids.to(self.device),labels.to(self.device)
-                output=model(list_of_indices,segments_ids)
-                loss=self.criterion(output,labels)
-                self.loss_history.append(loss.data.item())
+                
+                list_of_indices=list_of_indices.to(self.device)
+                segments_ids=segments_ids.to(self.device)
+                start_labels=start_labels.to(self.device).requires_grad_(False).long()
+                end_labels=end_labels.to(self.device).requires_grad_(False).long()
+                output_start,output_end=model(list_of_indices,segments_ids)
+                
+                start_loss=self.criterion(output_start,start_labels)                       
+                end_loss=self.criterion(output_end,end_labels)
+                loss=(start_loss+end_loss)/2
+                
+                self.loss_history.append(loss.detach().data.cpu().numpy())
                 self.learning_rate.append(self.scheduler.get_lr())
                 loss.backward()
                 self.optimizer.step()
                 self.optimizer.zero_grad()
-                _,prediction= torch.max(output, 1)  
-                train_res=np.append(train_res,(prediction.data.to('cpu')))
-                train_lbl=np.append(train_lbl,labels.data.cpu().numpy())
+                prediction_start=self.logits_to_one_hot(output_start)
+                prediction_end=self.logits_to_one_hot(output_end)
+                train_res_start=np.append(train_res_start,prediction_start)
+                train_res_end=np.append(train_res_end,prediction_end)
+                train_res=np.append(train_res,np.append(train_res_start,train_res_end))
+                train_lbl_start=np.append(train_lbl_start,self.index_to_labels_like(start_labels,output_start))
+                train_lbl_end=np.append(train_lbl_end,self.index_to_labels_like(end_labels,output_end))
+                train_lbl=np.append(train_lbl,np.append(train_lbl_start,train_lbl_end))
                 if((i+1)%print_every==0):
                     cm=ConfusionMatrix(train_lbl,train_res)
                     self.cm_train.append(cm)
@@ -236,22 +297,27 @@ class BertFineTuning():
                     print("Batch Loss: ",np.mean(self.loss_history[len(self.loss_history)-print_every:len(self.loss_history)-1]))
                     print('train results: \n')
                     self.print_results(cm)
+                    train_res_start=np.array([])
+                    train_res_end=np.array([])
                     train_res=np.array([])
+                    train_lbl_start=np.array([])
+                    train_lbl_end=np.array([])
                     train_lbl=np.array([])
+                    
                 torch.cuda.empty_cache()
                 gc.collect()
 
             print("epoch: ",e+1,"Train  Loss: ",np.mean(self.loss_history[-1*(len(train_loader)-1):]),"\n")
 
-            if(((e+1)>=validate_at_epoch)):
-                print("************************")
-                print("validation started ...","\n")
-                _cm,_loss=self.predict(valid_loader)
-                self.test_loss_history.append(_loss)
-                print('test loss: ', _loss)
-                self.print_results(_cm)
-                print("************************","\n")
-                self.cm_test.append(_cm)
-            self.save_it(self.save_folder)
+#             if(((e+1)>=validate_at_epoch)):
+#                 print("************************")
+#                 print("validation started ...","\n")
+#                 _cm,_loss=self.predict(valid_loader)
+#                 self.test_loss_history.append(_loss)
+#                 print('test loss: ', _loss)
+#                 self.print_results(_cm)
+#                 print("************************","\n")
+#                 self.cm_test.append(_cm)
+#             self.save_it(self.save_folder)
             self.scheduler.step()        
             

@@ -1,5 +1,5 @@
 from BertFineTuning.utils import *
-from BertFineTuning.model_config import*
+from BertFineTuning.duplicate_detection_model_config import*
 
 import os
 import sys
@@ -216,7 +216,9 @@ class BertFineTuning():
         for e in range(self.last_epoch,self.epochs,1):
             self.e=e
             
-            for i,(ids,list_of_indices,segments_ids,labels) in enumerate(train_loader):
+            for i,_loader_dict in enumerate(train_loader):
+                ids,list_of_indices,segments_ids,labels=_loader_dict.values()
+                labels=labels[0]
                 model.train()
                 list_of_indices,segments_ids,labels=list_of_indices.to(self.device),segments_ids.to(self.device),labels.to(self.device)
                 output=model(list_of_indices,segments_ids)
