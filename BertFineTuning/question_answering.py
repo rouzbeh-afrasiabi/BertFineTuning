@@ -282,6 +282,7 @@ class BertFineTuning():
                 loss.backward()
                 self.optimizer.step()
                 self.optimizer.zero_grad()
+                
                 prediction_start=self.logits_to_one_hot(output_start)
                 prediction_end=self.logits_to_one_hot(output_end)
                 train_res_start=np.append(train_res_start,prediction_start)
