@@ -1,5 +1,6 @@
 from BertFineTuning.utils import *
 from BertFineTuning.question_answering_model_config import *
+from transformers import BertTokenizer
 
 import os
 import sys
@@ -40,7 +41,8 @@ np.random.seed(random_state)
 
 
 class BertFineTuning():
-    def __init__(self,):
+    def __init__(self,model_config_user=model_config,base_model=BertModel,
+                 base_tokenizer=BertTokenizer,base_pretrained_weights='bert-base-uncased'):
         
         class View(nn.Module):
             def __init__(self, *shape):
@@ -60,7 +62,6 @@ class BertFineTuning():
             def __init__(self, pre_trained_model,config):
                 super().__init__()
                
-                
                 self.pre_trained_model=pre_trained_model.to(config['device'])
                 self.pre_trained_out_features=list(list(self.pre_trained_model.children())[-1].children())[0].out_features
                 self.model_output_features=config['max_token_length']
@@ -90,9 +91,17 @@ class BertFineTuning():
         self.criterion_config={}
         self.optimizer_config={}
         self.scheduler_config={}
-        self.config=model_config
+        if(model_config_user):
+            self.config=model_config_user
+        else:
+            self.config=model_config
         self.config['device']=self.device
-        self.pre_trained_model=BertModel.from_pretrained('bert-base-uncased')
+        
+        self._base_model=base_model
+        self._base_tokenizer=base_tokenizer
+        self._base_pretrained_weights=base_pretrained_weights
+        
+        self.pre_trained_model=base_model.from_pretrained(base_pretrained_weights)
         self.model=Network(self.pre_trained_model,self.config).to(self.device)
         self.parameters_main=[
             {"params": self.model.pre_trained_model.parameters(),
@@ -236,7 +245,7 @@ class BertFineTuning():
         gc.collect()
         return cm,np.mean(loss_history)
 
-    def train(self,model_config,train_loader,valid_loader,epochs=100,print_every=100,validate_at_epoch=0):
+    def train(self,train_loader,valid_loader,epochs=100,print_every=100,validate_at_epoch=0):
         model=self.model
         train_res_start=np.array([])
         train_res_end=np.array([])

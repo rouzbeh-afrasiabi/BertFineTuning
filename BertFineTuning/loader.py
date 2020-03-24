@@ -105,7 +105,8 @@ class CustomSet(Dataset):
     
     
 class MultiLoader():
-    def __init__(self,target_folder,dataLoader_config,model_config):
+    def __init__(self,target_folder,dataLoader_config,model_config,show_warning=True):
+        self.show_warning=show_warning
         self.__kwargs=data_load_config(target_folder,dataLoader_config,model_config['max_token_length'])
         self.__keys=list(self.__kwargs.keys())
         self.__values=list(self.__kwargs.values())
@@ -122,8 +123,9 @@ class MultiLoader():
                     output_loaders[key]=DataLoader(output_sets[key], **getattr(self._DataLoader_config,key))
                 else:
                     output_loaders[key]=DataLoader(output_sets[key],**default_loader_config)
-                    logging.warn(key+".csv"+"\nFile does not have a valid  data loader configuration in dataloader_config"
-                    +", using default_loader_config.")
+                    if(self.show_warning):
+                        logging.warn(key+".csv"+"\nFile does not have a valid  data loader configuration in dataloader_config"
+                        +", using default_loader_config.")
                 output_loaders[key].max_token_length=self._max_token_length
             return(output_loaders)
         self.__dict__.update(DataLoaders())
