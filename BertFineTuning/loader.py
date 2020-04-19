@@ -69,7 +69,7 @@ class CustomSet(Dataset):
             ids=self.samples[id_names[0]].iloc[idx]
         else:
             ids=[]
-        labels=list(self.samples[label].iloc[idx] for label in label_names)
+        labels={label:self.samples[label].iloc[idx] for label in label_names}
         list_of_indices = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(text))
         segments_ids=torch.tensor([int(102 in list_of_indices[:i]) for i,index in enumerate(list_of_indices)])
         

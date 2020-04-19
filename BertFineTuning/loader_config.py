@@ -1,12 +1,13 @@
 default_loader_config={
- 'batch_size': 10,
+ 'batch_size': 5,
  'shuffle': True,
  'sampler': None,
  'batch_sampler': None,
  'num_workers': 0,
  'pin_memory': False,
  'drop_last': False,
- 'timeout': 0,}
+ 'timeout': 0,
+  'drop_last':True}
 
 
 

@@ -72,33 +72,20 @@ class BertFineTuning():
                     ('fltn1',nn.Flatten()),
                     ('drp1',nn.Dropout(p=config['dropout_prob'])),
                     ('fc1', nn.Linear(self.pre_trained_out_features*self.model_output_features, self.model_output_features)),
-#                     ('bn_1',nn.BatchNorm1d(self.model_output_features)),
+                    ('bn_1',nn.BatchNorm1d(self.model_output_features)),
                     ('prelu1', nn.PReLU()),
-#                     ('fc2', nn.Linear(self.model_output_features, self.model_output_features*config['num_classes'])),
                     ('fc2', nn.Linear(self.model_output_features, self.model_output_features)),
 #                     ('rs1',View(-1, 2, self.model_output_features)),
 #                     ('splt1',Split(1)),
                 ]))
                 
-                self.flatten=nn.Flatten()
-                self.end_out=nn.Sequential(OrderedDict([
-#                     ('prelu1', nn.PReLU()),
-                    ('fc2', nn.Linear(self.model_output_features, self.model_output_features)),
-                ]))
-                self.start_out=nn.Sequential(OrderedDict([
-#                     ('prelu1', nn.PReLU()),
-                    ('fc2', nn.Linear(self.model_output_features, self.model_output_features)),
-                ]))                
+#                 self.flatten=nn.Flatten()
                 
             def forward(self, tokens_tensor, segments_tensors):
                 last_hidden_state, pooled_output = self.pre_trained_model(tokens_tensor, segments_tensors)
-                logits = self.classifier(last_hidden_state) 
-                start_logits=self.start_out(logits)
-                end_logits=self.end_out(start_logits)
-#                 start_logits, end_logits = self.classifier(last_hidden_state)
-#                 start_logits, end_logits= self.pre_trained_model(tokens_tensor, segments_tensors)
-#                 return start_logits, end_logits
-                return start_logits,end_logits,logits
+                logits = self.classifier(last_hidden_state)
+
+                return (logits) 
         
             
         def __device():
@@ -123,20 +110,20 @@ class BertFineTuning():
         self.model=Network(self.pre_trained_model,self.config).to(self.device)
         self.parameters_main=[
             {"params": self.model.pre_trained_model.parameters(),
-             "lr": self.config['learning_rate_PT'],'weight_decay': self.config['weight_decay_PT']},
+             "lr": self.config['learning_rate_PT'],'weight_decay': self.config['weight_decay']},
             {"params": self.model.classifier.parameters(),
-             "lr": self.config['learning_rate_CLS'],'weight_decay': self.config['weight_decay_CLS']},
+             "lr": self.config['learning_rate_CLS'],'weight_decay': self.config['weight_decay']},
                                 ]
         self.no_decay = ['bias', 'LayerNorm.weight']
         self.__PT_n_param=self.model.pre_trained_model.named_parameters()
         self.__CLS_n_param=self.model.classifier.named_parameters()
         self.parameters_noDecay=[
             {'params': [p for n, p in self.__PT_n_param if not any(nd in n for nd in self.no_decay) and p.requires_grad],
-             "lr": self.config['learning_rate_PT'], 'weight_decay': self.config['weight_decay_PT']},
+             "lr": self.config['learning_rate_PT'], 'weight_decay': self.config['weight_decay']},
             {'params': [p for n, p in self.__PT_n_param if any(nd in n for nd in self.no_decay) and p.requires_grad],
              "lr": self.config['learning_rate_PT'], 'weight_decay': 0.0},
             {'params': [p for n, p in self.__CLS_n_param if p.requires_grad],
-             "lr": self.config['learning_rate_CLS'], 'weight_decay': self.config['weight_decay']},
+             "lr": self.config['learning_rate_PT'], 'weight_decay': self.config['weight_decay']},
                                 ]
         self.scheduler_step_epoch=False
         self.scheduler_step_batch=False
@@ -144,7 +131,6 @@ class BertFineTuning():
         self.optimizer=None
         self.scheduler=None
         self.validate_at_epoch=0
-        self.clip_value=1
         self.checkpoint=None
         self.loss_history=[]
         self.test_loss_history=[]
@@ -158,7 +144,6 @@ class BertFineTuning():
         self.e=0
         self.target_folder=cwd
         self.save_folder=os.path.join(cwd,'checkpoints')
-        
         
     @staticmethod
     def _update_dict_strict(target,**kwargs):
@@ -186,11 +171,7 @@ class BertFineTuning():
         cm.print_matrix() 
         
     @staticmethod    
-    def logit_to_one_hot(logit,threshold):
-
-        return((torch.sigmoid(logit) > threshold).float())        
-    @staticmethod    
-    def logits_to_one_hot(logits_start,logits_end,is_flatten=True):
+    def logits_to_one_hot(logits_start,logits_end):
 
         loc_start=torch.argmax(logits_start,dim=1).data.cpu().numpy()
         loc_end=torch.argmax(logits_end,dim=1).data.cpu().numpy()
@@ -199,12 +180,17 @@ class BertFineTuning():
         for i,r in enumerate(span):
             r=[item for item in r if item<logits_end.shape[-1]]
             prediction[i,r]=1
-        if(is_flatten):
-            prediction=prediction.flatten()
+        prediction=prediction.flatten()
         return(prediction)
     
+    @staticmethod    
+    def logit_to_one_hot(logit,threshold):
+
+        return((torch.sigmoid(logit) > threshold).float())
+
+    
     @staticmethod
-    def index_to_labels_like(loc_start,loc_end,logit):
+    def index_to_labels_like(loc_start,loc_end,logit,is_flatten=True):
         loc_start=loc_start.data.cpu().numpy()
         loc_end=loc_end.data.cpu().numpy()
         labels=np.zeros_like(logit.detach().data.cpu().numpy())
@@ -212,41 +198,33 @@ class BertFineTuning():
         for i,r in enumerate(span):
             r=[item for item in r if item<logit.shape[-1]]
             labels[i,r]=1
-        labels=labels.flatten()
+        if(is_flatten):
+            labels=labels.flatten()
         return(labels)
 
     @staticmethod
     def span_to_labels_like(span,logit,is_flatten=True):
         labels=np.zeros_like(logit.detach().data.cpu().numpy()) 
         for i,r in enumerate(span):
-            if(not isinstance(r,list)):
-                span_item=literal_eval(r)
-            else:
-                span_item=r
-            r=[item for item in span_item if item<logit.shape[-1]]
+            r=[item for item in literal_eval(r) if item<logit.shape[-1]]
             labels[i,r]=1
         if(is_flatten):
             labels=labels.flatten()
         return(labels)
     
     @staticmethod
-    def exact_match(span_label,span_target):
-        exact_match_res=[]
-        for actual,target in zip(span_label,span_target):
-            if(target!=[]):
-                exact_match_res.append(int(set(target).issubset(set(actual))))
-            else:
-                exact_match_res.append(0)
-
-        return(np.mean(exact_match_res))
-    
-    @staticmethod
-    def any_match(span_label,span_target):
-        any_match=[]
-        for actual,target in zip(span_label,span_target):
-            any_match.append(int(any([int(item in actual) for item in target])))
-
-        return(np.mean(any_match))
+    def exact_match(logits_start,logits_end,list_of_indices):
+        loc_start=torch.argmax(logits_start,dim=1).data.cpu().numpy()
+        loc_end=torch.argmax(logits_end,dim=1).data.cpu().numpy()
+        span=[list(range(*item)) for item in list(zip(loc_start,loc_end+1))] 
+        result=[]
+        for i,r in enumerate(span):
+            indices=list_of_indices[i,r].data.cpu().numpy()
+#             tokens=base_tokenizer.convert_ids_to_tokens(indices)
+#             string=base_tokenizer.convert_tokens_to_string(tokens)
+            result.append(indices)
+            
+        return(result)
         
     def save_it(self,target_folder):
         self.model.eval()
@@ -292,54 +270,39 @@ class BertFineTuning():
             return 
 
     def predict(self,target_loader):
-        
         self.model.eval()
+        
         with torch.no_grad():
             criterion=self.criterion
             test_res=np.array([])
             test_lbl=np.array([])
-            loss_history=[]
+            loss_history=[0]
             labels=np.array([])
-            test_exact_match=np.array([])
-            test_any_match=np.array([])
             
             for i,_loader_dict in  enumerate(target_loader):
                 ids,list_of_indices,segments_ids,labels=_loader_dict.values()
-                
-                start_labels=labels['start_label']
-                end_labels=labels['end_label']
-                span_str=labels['span_label']
-                span=[eval(item) for item in span_str]
-                
+                start_labels,end_labels,span=labels
                 
                 list_of_indices=list_of_indices.to(self.device)
                 segments_ids=segments_ids.to(self.device)
                 start_labels=start_labels.to(self.device).requires_grad_(False).long()
                 end_labels=end_labels.to(self.device).requires_grad_(False).long()
-                output_start,output_end,output=self.model(list_of_indices,segments_ids)
+                output_start,output_end=self.model(list_of_indices,segments_ids)
 
                 start_loss=self.criterion(output_start,start_labels)                       
                 end_loss=self.criterion(output_end,end_labels)
                 loss=(start_loss+end_loss)/2
                 loss_history.append(loss.detach().item())
                 
-                loc_start=torch.argmax(output_start,dim=1).data.cpu().numpy()
-                loc_end=torch.argmax(output_end,dim=1).data.cpu().numpy()
-                span_target=[list(range(*item)) for item in list(zip(loc_start,loc_end+1))] 
-
-                prediction=self.span_to_labels_like(span_target,output_start)
-                test_lbl=np.append(test_lbl,self.span_to_labels_like(span,output_start))
-                
+                prediction=self.logits_to_one_hot(output_start,output_end)
                 test_res=np.append(test_res,prediction)
-                test_exact_match=np.append(test_exact_match,self.exact_match(span,span_target))
-                test_any_match=np.append(test_any_match,self.any_match(span,span_target))
+                test_lbl=np.append(test_lbl,self.span_to_labels_like(span,output_start))
                 
 
             cm=ConfusionMatrix(test_lbl,test_res)
         torch.cuda.empty_cache()
         gc.collect()
-        
-        return cm,np.mean(loss_history),np.mean(test_exact_match),np.mean(test_any_match)
+        return cm,np.mean(loss_history)
 
     def train(self,train_loader,valid_loader,epochs=100,print_every=100,validate_at_epoch=0):
         model=self.model
@@ -349,8 +312,6 @@ class BertFineTuning():
         train_lbl_start=np.array([])
         train_lbl_end=np.array([])
         train_lbl=np.array([])
-        train_exact_match=np.array([])
-        train_any_match=np.array([])
         if(not self.check_point_loaded):
             self.loss_history=[]
             self.test_loss_history=[]
@@ -370,61 +331,38 @@ class BertFineTuning():
             self.e=e
             for i,_loader_dict in enumerate(train_loader):
                 ids,list_of_indices,segments_ids,labels=_loader_dict.values()
-                
-                start_labels=labels['start_label']
-                end_labels=labels['end_label']
-                span_str=labels['span_label']
-                span=[eval(item) for item in span_str]
+                start_labels,end_labels,span=labels
                 
                 model.train()
                 
                 list_of_indices=list_of_indices.to(self.device)
                 segments_ids=segments_ids.to(self.device)
-                start_labels=start_labels.to(self.device).requires_grad_(False).long()
-                end_labels=end_labels.to(self.device).requires_grad_(False).long()
-                output_start,output_end,output=model(list_of_indices,segments_ids)
                 
-#                 labels=torch.from_numpy(self.span_to_labels_like(span,output,is_flatten=False)).requires_grad_(False).to(self.device)
-                
-                start_loss=self.criterion(output_start,start_labels)                       
-                end_loss=self.criterion(output_end,end_labels)
-                loss=((start_loss+end_loss)/2)
+                output=model(list_of_indices,segments_ids)
+                labels=torch.from_numpy(self.span_to_labels_like(span,output,is_flatten=False)).requires_grad_(False).to(self.device)
+                loss=self.criterion(output,labels)
                 
                 self.loss_history.append(loss.detach().data.cpu().numpy())
                 self.learning_rate.append(self.scheduler.get_lr())
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), self.clip_value)
                 self.optimizer.step()
                 self.optimizer.zero_grad()
                 if(self.scheduler_step_batch):
                     self.scheduler.step()
                 
-                loc_start=torch.argmax(output_start,dim=1).data.cpu().numpy()
-                loc_end=torch.argmax(output_end,dim=1).data.cpu().numpy()
-                span_target=[list(range(*item)) for item in list(zip(loc_start,loc_end+1))] 
-                
-                prediction=self.span_to_labels_like(span_target,output_start)
-                train_lbl=np.append(train_lbl,self.span_to_labels_like(span,output_start))
-                
-                train_res=np.append(train_res,prediction)
-                train_exact_match=np.append(train_exact_match,self.exact_match(span,span_target))
-                train_any_match=np.append(train_any_match,self.any_match(span,span_target))
+                prediction=self.logit_to_one_hot(output,0.5)
+                train_res=np.append(train_res,prediction.detach().data.cpu().numpy())
+                train_lbl=np.append(train_lbl,labels.detach().data.cpu().numpy())
                 
                 if((i+1)%print_every==0):
-                    print('train results: \n')
                     cm=ConfusionMatrix(train_lbl,train_res)
                     self.cm_train.append(cm)
                     print("epoch: ",e+1," step: ",(i+1)//print_every,"/",self.train_loops)
                     print("Batch Loss: ",np.mean(self.loss_history[len(self.loss_history)-print_every:len(self.loss_history)-1]))
-                    print("Exact match mean: ",np.mean(train_exact_match))
-                    print("Any match mean: ",np.mean(train_any_match),'\n')
-                    
+                    print('train results: \n')
                     self.print_results(cm)
-
                     train_res=np.array([])
                     train_lbl=np.array([])
-                    train_exact_match=np.array([])
-                    train_any_match=np.array([])
                     
 
                 torch.cuda.empty_cache()
@@ -435,11 +373,9 @@ class BertFineTuning():
             if(((e+1)>=validate_at_epoch)):
                 print("************************")
                 print("validation started ...","\n")
-                _cm,_loss,_test_exact_match,_test_any_match=self.predict(valid_loader)
+                _cm,_loss=self.predict(valid_loader)
                 self.test_loss_history.append(_loss)
                 print('test loss: ', _loss)
-                print("Exact match mean: ",_test_exact_match)
-                print("Any match mean: ",_test_any_match,'\n')
                 self.print_results(_cm)
                 print("************************","\n")
                 self.cm_test.append(_cm)
