@@ -6,5 +6,5 @@ transformers==2.5.1
 requests==2.22.0
 pytorch_transformers==1.0.0
 pycm==2.2
-numpy==1.18.2
+numpy==1.22.0
 scikit_learn==0.22.2.post1
